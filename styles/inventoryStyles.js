@@ -1,44 +1,45 @@
-// inventoryStyles.js
-import { StyleSheet } from "react-native";
-import colors from "../styles/colors"; // Ensure you use your colors.js file
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
-
-
-  tableContainer: {
-    margin: 10,
-    borderRadius: 5,
-    overflow: "hidden",
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#1E88E5",
-    paddingVertical: 10,
-    alignItems: "center",
+    flexDirection: 'row',
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   headerItem: {
-    flex: 1, // Ensures equal width for each column
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 5,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  tableHeaderText: {
-    fontWeight: "bold",
-    color: "#FFFFFF",
+  headerText: {
+    fontWeight: 'bold',
     fontSize: 14,
-    textAlign: "center",
+    color: '#333',
   },
   tableRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#FFC107",
-    paddingVertical: 8,
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: '#eee',
   },
-  tableCell: {
+  cellItem: {
     flex: 1,
-    textAlign: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cellText: {
     fontSize: 14,
-    color: "#212121",
+    color: '#666',
   },
 });

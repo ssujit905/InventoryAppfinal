@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Modal, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Modal, Alert, ActivityIndicator } from 'react-native';
 import { collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -12,13 +12,15 @@ const Expenses = () => {
   const [details, setDetails] = useState('');
   const [amount, setAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
   const fetchExpenses = async () => {
+    setLoading(true);
     try {
       const q = query(collection(db, 'expenses'), orderBy('date', 'desc'));
       const querySnapshot = await getDocs(q);
@@ -32,6 +34,7 @@ const Expenses = () => {
       console.error('Error fetching expenses:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -41,12 +44,11 @@ const Expenses = () => {
       return;
     }
     try {
-      const docRef = await addDoc(collection(db, 'expenses'), {
+      await addDoc(collection(db, 'expenses'), {
         date,
         details,
         amount: parseFloat(amount),
       });
-      console.log('Expense added with ID:', docRef.id);
       setModalVisible(false);
       setDate(new Date().toISOString().split('T')[0]);
       setDetails('');
@@ -59,22 +61,29 @@ const Expenses = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={expenses}
-        keyExtractor={(item) => item.id}
-        refreshing={loading}
-        onRefresh={fetchExpenses}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.serial}>{item.serial}</Text>
-            <View>
-              <Text style={styles.date}>{item.date}</Text>
-              <Text style={styles.details}>{item.details}</Text>
-              <Text style={styles.amount}>$ {item.amount}</Text>
-            </View>
-          </View>
-        )}
-      />
+      {loading && <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />}
+
+     <FlatList
+  data={expenses}
+  keyExtractor={(item) => item.id}
+  refreshing={refreshing}
+  onRefresh={() => {
+    setRefreshing(true);
+    fetchExpenses();
+  }}
+  numColumns={2} // Display two items per row
+  columnWrapperStyle={styles.row} // Add spacing between columns
+  renderItem={({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.serial}>{item.serial}</Text>
+      <Text style={styles.date}>{item.date}</Text>
+      <Text style={styles.details}>{item.details}</Text>
+      <Text style={styles.amount}>$ {item.amount}</Text>
+    </View>
+  )}
+/>
+
+
 
       {/* Floating Button */}
       <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>

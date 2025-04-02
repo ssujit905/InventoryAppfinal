@@ -1,103 +1,54 @@
 import { StyleSheet } from "react-native";
-import colors from "./colors"; // Import your color theme
-
-
+import colors from "./colors";
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-        padding: 10,
-    },
-
-
-searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    elevation: 3,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    height: 45, // Ensures enough space for the icon
-},
-searchIcon: {
-    marginRight: 8,
-},
-searchInput: {
-    flex: 1,
-    height: 40,
-    fontSize: 16,
-    color: colors.text,
-},
-    card: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 10,
-        elevation: 2,
-    },
-    serial: {
-        fontWeight: "bold",
-        fontSize: 16,
-        color: colors.primary,
-    },
-    cardContent: {
-        marginTop: 5,
-    },
-    cardText: {
-        color: colors.text,
-    },
-
-
-
-
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "#fff",
     padding: 10,
   },
   card: {
-    flexDirection: "row",
-    backgroundColor: colors.white,
-    padding: 15,
-    marginVertical: 5,
+    backgroundColor: "#f5f5f5",
+    marginBottom: 10,
+    padding: 10,
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   serial: {
-    fontSize: 16,
     fontWeight: "bold",
-    color: colors.primary,
     marginRight: 10,
   },
   cardContent: {
     flex: 1,
+    justifyContent: "center",
+  },
+  statusContainer: {
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+  },
+  statusText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   fab: {
+    backgroundColor: colors.primary,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     position: "absolute",
     right: 20,
     bottom: 20,
-    backgroundColor: colors.primary,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     elevation: 5,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.white,
     padding: 20,
+    backgroundColor: "#fff",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -105,97 +56,67 @@ searchInput: {
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: "center",
   },
   input: {
-    height: 45,
-    borderColor: colors.primary,
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: colors.white,
-  },
-  productRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  productInput: {
-    flex: 1,
-    height: 45,
-    borderColor: colors.secondary,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    marginRight: 5,
-    backgroundColor: colors.white,
-  },
-
-statusContainer: {
-  minWidth: 100,
-  paddingVertical: 5,
-  paddingHorizontal: 10,
-  borderRadius: 5,
-  alignItems: "center",
-  justifyContent: "center",
-  marginHorizontal: 5,
-},
-statusText: {
-  color: "#FFFFFF",
-  fontSize: 14,
-  fontWeight: "bold",
-},
-
-
-  addProductButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  addProductText: {
-    marginLeft: 5,
-    color: colors.primary,
+    padding: 12,
+    marginVertical: 8,
     fontSize: 16,
   },
   picker: {
-    height: 45,
-    borderColor: colors.primary,
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: colors.white,
+    marginVertical: 8,
+  },
+  productRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  productInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginHorizontal: 5,
+    flex: 1,
+    fontSize: 16,
+  },
+  addProductButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  addProductText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: colors.primary,
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-marginTop: 5,
+    justifyContent: "space-around",
+    marginVertical: 20,
   },
   addButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
+    padding: 15,
+    borderRadius: 8,
     flex: 1,
-    marginRight: 5,
+    marginHorizontal: 5,
+    alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: colors.secondary,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
+    backgroundColor: "#999",
+    padding: 15,
+    borderRadius: 8,
     flex: 1,
-    marginLeft: 5,
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: "bold",
+    marginHorizontal: 5,
+    alignItems: "center",
   },
 });
 

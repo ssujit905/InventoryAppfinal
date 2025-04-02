@@ -27,6 +27,11 @@ const Dashboard = () => {
   const [showPreviousMonths, setShowPreviousMonths] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+const [isLoadingPreviousMonths, setIsLoadingPreviousMonths] = useState(false);
+
+
+
+
 
   const fetchSalesData = async () => {
     try {
@@ -210,17 +215,32 @@ contentContainerStyle={dashboardStyles.contentContainer}
       <Text style={dashboardStyles.deliveredText}>Delivered: {monthlySales.delivered}</Text>
       <Text style={dashboardStyles.returnedText}>Returned: {monthlySales.returned}</Text>
 
-      <TouchableOpacity
+<TouchableOpacity
         style={[dashboardStyles.button, { backgroundColor: colors.primary }]}
-        onPress={() => {
-          if (!showPreviousMonths) fetchPreviousMonthsData();
+        onPress={async () => {
+          if (!showPreviousMonths) {
+            setIsLoadingPreviousMonths(true);
+            await fetchPreviousMonthsData();
+            setIsLoadingPreviousMonths(false);
+          }
           setShowPreviousMonths(!showPreviousMonths);
         }}
+        disabled={isLoadingPreviousMonths}
       >
-        <Text style={dashboardStyles.buttonText}>
-          {showPreviousMonths ? "Hide All Months" : "Show All Months"}
+<Text style={dashboardStyles.buttonText}>
+          {isLoadingPreviousMonths
+            ? "Loading..."
+            : showPreviousMonths
+            ? "Hide All Months"
+            : "Show All Months"}
         </Text>
       </TouchableOpacity>
+
+
+
+
+
+
 
       {showPreviousMonths &&
         previousMonths.map((monthData, index) => (

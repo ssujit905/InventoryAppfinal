@@ -52,7 +52,8 @@ searchContainer: {
     alignSelf: 'center',
   },
   quoteCard: {
-    backgroundColor: '#e9f5ff',
+    backgroundColor: "#FFC107",
+
     padding: 20,
     borderRadius: 10,
     marginVertical: 20,

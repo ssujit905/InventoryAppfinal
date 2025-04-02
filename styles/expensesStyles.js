@@ -7,19 +7,7 @@ export default StyleSheet.create({
     backgroundColor: colors.background,
     padding: 10,
   },
-  card: {
-    backgroundColor: colors.white,
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
+
   serial: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -102,7 +90,28 @@ export default StyleSheet.create({
     borderRadius: 5,
     flex: 1,
     marginLeft: 5,
+
   },
+row: {
+  justifyContent: "space-between",
+  marginBottom: 10, // Space between rows
+},
+
+card: {
+  flex: 1,
+  backgroundColor: "#fff",
+  padding: 15,
+  marginHorizontal: 5,
+  borderRadius: 10,
+  elevation: 3,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+
+
+
+
   buttonText: {
     color: colors.white,
     textAlign: 'center',
