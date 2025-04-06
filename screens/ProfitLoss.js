@@ -1,161 +1,189 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, Alert } from "react-native";
-import { db } from "../firebase"; // Ensure firebase.js is properly set up
-import { collection, getDocs, doc, setDoc, query, where } from "firebase/firestore";
-import styles from "../styles/profitLossStyles"; // Create styles file separately
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import colors from '../styles/colors';
 
-const ProfitLoss = () => {
-  const [purchaseCost, setPurchaseCost] = useState(0);
-  const [totalExpenses, setTotalExpenses] = useState(0);
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [totalInvestment, setTotalInvestment] = useState(0);
-  const [soldCost, setSoldCost] = useState(0);
-  const [monthlyProfit, setMonthlyProfit] = useState(0);
-  const [monthlyProfits, setMonthlyProfits] = useState([]);
-  const [showAllMonths, setShowAllMonths] = useState(false);
-
-  const currentDate = new Date();
-  const currentMonth = currentDate.toLocaleString("default", { month: "short" }); // Example: "Mar"
-  const currentYear = currentDate.getFullYear();
-  const currentMonthYear = `${currentMonth} ${currentYear}`;
+const ProfitLossScreen = () => {
+  const [expenses, setExpenses] = useState(0);
+  const [purchasedAmount, setPurchasedAmount] = useState(0);
+  const [income, setIncome] = useState(0);
+  const [investment, setInvestment] = useState(0);
+  const [productCosts, setProductCosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // <-- new state
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
   const fetchData = async () => {
     try {
-      // Fetch total purchase cost from purchaseSummary in Firebase
-      const fetchPurchaseCost = async () => {
-    try {
-      const purchaseDoc = await getDoc(doc(db, "purchaseSummary", "totalCost"));
-      if (purchaseDoc.exists()) {
-        setPurchaseCost(purchaseDoc.data().total);
-      }
-    } catch (error) {
-      console.error("Error fetching purchase cost:", error);
+      let totalExpenses = 0;
+      const expensesSnapshot = await getDocs(collection(db, 'expenses'));
+      expensesSnapshot.forEach(doc => {
+        totalExpenses += Number(doc.data().amount || 0);
+      });
+
+      let totalIncome = 0;
+      const incomeSnapshot = await getDocs(collection(db, 'income'));
+      incomeSnapshot.forEach(doc => {
+        totalIncome += Number(doc.data().amount || 0);
+      });
+
+      let totalInvestment = 0;
+      const investmentSnapshot = await getDocs(collection(db, 'investment'));
+      investmentSnapshot.forEach(doc => {
+        totalInvestment += Number(doc.data().amount || 0);
+      });
+
+      let purchaseSummaryValue = 0;
+      const purchaseSummarySnapshot = await getDocs(collection(db, 'purchaseSummary'));
+      purchaseSummarySnapshot.forEach(doc => {
+        purchaseSummaryValue += Number(doc.data().value || 0);
+      });
+
+      const salesSnapshot = await getDocs(collection(db, 'sales'));
+      const avgCostsSnapshot = await getDocs(collection(db, 'averageCosts'));
+      const avgCostMap = {};
+
+      avgCostsSnapshot.forEach((doc) => {
+        avgCostMap[doc.id] = doc.data().avgCost || 0;
+      });
+
+      const productCostMap = {};
+
+      salesSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.status !== "delivered" && data.status !== "Delivered") return;
+
+        data.products?.forEach((product) => {
+          const code = product.productCode;
+          const qty = parseInt(product.quantity);
+          const unitCost = avgCostMap[code] || 0;
+
+          if (!productCostMap[code]) {
+            productCostMap[code] = { quantity: 0, unitCost };
+          }
+
+          productCostMap[code].quantity += qty;
+        });
+      });
+
+      const productCostData = Object.keys(productCostMap).map((code) => {
+        const { quantity, unitCost } = productCostMap[code];
+        return {
+          productCode: code,
+          quantity,
+          unitCost,
+          totalCost: quantity * unitCost,
+        };
+      });
+
+      setExpenses(totalExpenses);
+      setIncome(totalIncome);
+      setInvestment(totalInvestment);
+      setPurchasedAmount(purchaseSummaryValue);
+      setProductCosts(productCostData);
+      setLoading(false);
+    } catch (err) {
+      console.log('Error fetching data:', err);
     }
   };
 
+  const totalProductCost = productCosts.reduce((sum, item) => sum + item.totalCost, 0);
+  const totalProfitLoss = income - (expenses + purchasedAmount);
+  const cashInHand = (income + investment) - (expenses + purchasedAmount);
+  const remainingStockValue = purchasedAmount - totalProductCost;
 
-      // Fetch total expenses from Expenses screen
-      const expensesSnap = await getDocs(collection(db, "expenses"));
-      let totalExp = 0;
-      expensesSnap.forEach((doc) => {
-        totalExp += doc.data().amount || 0;
-      });
-      setTotalExpenses(totalExp);
-
-      // Fetch total income and total investment from Income screen
-      const incomeSnap = await getDocs(collection(db, "income"));
-      let incomeTotal = 0;
-      let investmentTotal = 0;
-      incomeSnap.forEach((doc) => {
-        if (doc.data().type === "income") {
-          incomeTotal += doc.data().amount || 0;
-        } else if (doc.data().type === "investment") {
-          investmentTotal += doc.data().amount || 0;
-        }
-      });
-      setTotalIncome(incomeTotal);
-      setTotalInvestment(investmentTotal);
-
-      // Calculate Sold Cost from Sales Screen (filtering delivered products)
-      const salesSnap = await getDocs(collection(db, "sales"));
-      let totalSoldCost = 0;
-      const productAvgCostRef = collection(db, "purchaseSummary");
-      const productAvgCostSnap = await getDocs(productAvgCostRef);
-
-      let avgCostMap = {};
-      productAvgCostSnap.forEach((doc) => {
-        avgCostMap[doc.id] = doc.data().avgCost || 0; // Map product codes to avg cost
-      });
-
-      salesSnap.forEach((doc) => {
-        const sale = doc.data();
-        if (sale.status === "Delivered" && sale.products) {
-          sale.products.forEach((product) => {
-            const avgCost = avgCostMap[product.productCode.trim()] || 0;
-            totalSoldCost += (product.quantity || 0) * avgCost;
-          });
-        }
-      });
-
-      setSoldCost(totalSoldCost);
-
-      // Fetch monthly profit history
-      const profitSnap = await getDocs(collection(db, "monthlyProfits"));
-      let profits = [];
-      profitSnap.forEach((doc) => {
-        profits.push({ id: doc.id, ...doc.data() });
-      });
-      setMonthlyProfits(profits);
-
-      // Calculate Current Month Profit
-      const profit = incomeTotal - (totalExp + totalSoldCost);
-      setMonthlyProfit(profit);
-
-      // Auto-save profit at the end of the month
-      autoSaveMonthlyProfit(currentMonthYear, profit);
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-    }
-  };
-
-  const autoSaveMonthlyProfit = async (monthYear, profit) => {
-    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    if (currentDate.getDate() === lastDay) {
-      try {
-        await setDoc(doc(db, "monthlyProfits", monthYear), { amount: profit });
-        Alert.alert("Monthly Profit Saved", `Saved profit for ${monthYear}: $${profit}`);
-      } catch (error) {
-        console.error("Error saving monthly profit: ", error);
-      }
-    }
-  };
+  if (loading && !refreshing)
+    return <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />;
 
   return (
-    <View style={styles.container}>
-      {/* Summary Section */}
-      <View style={styles.summaryBox}>
-        <Text style={[styles.label, styles.redText]}>Total Purchase Cost: ${purchaseCost}</Text>
-        <Text style={[styles.label, styles.redText]}>Total Expenses: ${totalExpenses}</Text>
-        <Text style={[styles.label, styles.greenText]}>Total Income: ${totalIncome}</Text>
-        <Text style={[styles.label, styles.greenText]}>Total Investment: ${totalInvestment}</Text>
-        <Text style={styles.label}>
-          Remaining Stock Value: ${purchaseCost - soldCost}
-        </Text>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <Text style={[styles.label, { color: 'red' }]}>Total Expenses: ₹{expenses}</Text>
+      <Text style={styles.label}>Total Purchased Amount: ₹{purchasedAmount}</Text>
+      <Text style={[styles.label, { color: 'green' }]}>Total Income: ₹{income}</Text>
+      <Text style={[styles.label, { color: 'orange' }]}>Total Investment: ₹{investment}</Text>
+      <Text style={[styles.label, { color: totalProfitLoss >= 0 ? 'green' : 'red' }]}>Total Profit/Loss: ₹{totalProfitLoss}</Text>
+      <Text style={styles.label}>Cash in Hand: ₹{cashInHand}</Text>
+      <Text style={styles.label}>Remaining Stock Value: ₹{remainingStockValue}</Text>
+
+      <Text style={styles.title}>Product Cost Table</Text>
+      <View style={styles.tableHeader}>
+        <Text style={styles.headerText}>Code</Text>
+        <Text style={styles.headerText}>Qty</Text>
+        <Text style={styles.headerText}>Unit</Text>
+        <Text style={styles.headerText}>Total</Text>
       </View>
 
-      {/* Monthly Profit Section */}
-      <View style={styles.monthlyProfit}>
-        <Text style={styles.monthlyTitle}>Profit this month</Text>
-        <View style={styles.row}>
-          <Text style={styles.monthText}>{currentMonthYear}</Text>
-          <Text style={styles.profitAmount}>${monthlyProfit}</Text>
+      {productCosts.map((item, index) => (
+        <View key={index} style={styles.tableRow}>
+          <Text style={styles.rowText}>{item.productCode}</Text>
+          <Text style={styles.rowText}>{item.quantity}</Text>
+          <Text style={styles.rowText}>{item.unitCost}</Text>
+          <Text style={styles.rowText}>{item.totalCost.toFixed(2)}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.showAllButton}
-          onPress={() => setShowAllMonths(!showAllMonths)}
-        >
-          <Text style={styles.showAllText}>{showAllMonths ? "Hide" : "Show All"}</Text>
-        </TouchableOpacity>
-      </View>
+      ))}
 
-      {/* All Monthly Profits List */}
-      {showAllMonths && (
-        <FlatList
-          data={monthlyProfits}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Text style={styles.monthlyProfitItem}>
-              {item.id}: ${item.amount}
-            </Text>
-          )}
-        />
-      )}
-    </View>
+      <Text style={[styles.label, { marginTop: 10 }]}>
+        Total Product Cost: ₹{totalProductCost.toFixed(2)}
+      </Text>
+    </ScrollView>
   );
 };
 
-export default ProfitLoss;
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  label: {
+    fontSize: 16,
+    marginVertical: 6,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 18,
+    marginTop: 20,
+    fontWeight: 'bold',
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginBottom: 6,
+  },
+  headerText: {
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    borderBottomWidth: 0.5,
+    borderColor: '#ccc',
+  },
+  rowText: {
+    flex: 1,
+    textAlign: 'center',
+  },
+});
+
+export default ProfitLossScreen;
