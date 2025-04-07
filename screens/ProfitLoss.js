@@ -116,9 +116,12 @@ const ProfitLossScreen = () => {
       <Text style={styles.label}>Total Purchased Amount: ₹{purchasedAmount}</Text>
       <Text style={[styles.label, { color: 'green' }]}>Total Income: ₹{income}</Text>
       <Text style={[styles.label, { color: 'orange' }]}>Total Investment: ₹{investment}</Text>
-      <Text style={[styles.label, { color: totalProfitLoss >= 0 ? 'green' : 'red' }]}>Total Profit/Loss: ₹{totalProfitLoss}</Text>
+
       <Text style={styles.label}>Cash in Hand: ₹{cashInHand}</Text>
       <Text style={styles.label}>Remaining Stock Value: ₹{remainingStockValue}</Text>
+<Text style={[styles.label1, { color: totalProfitLoss >= 0 ? 'green' : 'red' }]}>Total Profit/Loss: ₹{totalProfitLoss}</Text>
+
+
 
       <Text style={styles.title}>Product Cost Table</Text>
       <View style={styles.tableHeader}>
@@ -154,6 +157,13 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     fontWeight: 'bold',
   },
+label1: {
+    fontSize: 22,
+
+    marginVertical: 6,
+    fontWeight: 'bold',
+  },
+
   title: {
     fontSize: 18,
     marginTop: 20,

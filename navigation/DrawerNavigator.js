@@ -1,4 +1,3 @@
-// navigation/DrawerNavigator.js
 import React, { useContext } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Dashboard from '../screens/Dashboard';
@@ -6,14 +5,15 @@ import StockIn from '../screens/StockIn';
 import Expenses from '../screens/Expenses';
 import Sales from '../screens/Sales';
 import Inventory from '../screens/Inventory';
-
-import FinanceDrawer from './FinanceDrawer';
 import UserRoles from '../screens/UserRoles';
+import Purchase from '../screens/Purchase';
+import Income from '../screens/Income';
+import ProfitLoss from '../screens/ProfitLoss';
+import MonthlyProfit from '../screens/MonthlyProfit';
 import CustomDrawerContent from './CustomDrawerContent';
 import { UserContext } from '../context/UserContext';
 import colors from '../styles/colors';
 import { Ionicons } from '@expo/vector-icons';
-
 
 const Drawer = createDrawerNavigator();
 
@@ -77,18 +77,28 @@ const DrawerNavigator = () => {
         }}
       />
 
-      {/* Only admin users can see Finance and User Roles */}
+      {/* Hidden Finance Sub-Screens */}
       {role === 'admin' && (
         <>
           <Drawer.Screen
-            name="Finance"
-
-            component={FinanceDrawer}
-            options={{
-              drawerIcon: ({ color, size }) => (
-                <Ionicons name="stats-chart" size={size} color={color} />
-              ),
-            }}
+            name="Purchase"
+            component={Purchase}
+            options={{ drawerItemStyle: { height: 0 } }}
+          />
+          <Drawer.Screen
+            name="Income"
+            component={Income}
+            options={{ drawerItemStyle: { height: 0 } }}
+          />
+          <Drawer.Screen
+            name="Profit/Loss"
+            component={ProfitLoss}
+            options={{ drawerItemStyle: { height: 0 } }}
+          />
+          <Drawer.Screen
+            name="Monthly Profit"
+            component={MonthlyProfit}
+            options={{ drawerItemStyle: { height: 0 } }}
           />
           <Drawer.Screen
             name="User Roles"
